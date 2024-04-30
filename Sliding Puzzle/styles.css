@@ -1,0 +1,15 @@
+.mainBox{
+    display: grid;
+    justify-content: center;
+    grid-template: 
+    "a a a a"
+    "b b b b"
+    "c c c c"
+    "d d d d"
+    ;
+}
+.mainBox .tile{
+    text-align: center;
+    width: 3rem;
+    height: 3rem;
+}
