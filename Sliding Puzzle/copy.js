@@ -1,6 +1,6 @@
 let mainBox=document.querySelector(".mainBox");
 let tiles=document.querySelectorAll(".tile");
-let tileOrder=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+let tileOrder=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,15];
 const dir=[[-1,0],[0,1],[1,0],[0,-1]];
 let tileMatr=[[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
 let winComb=[[0,0,0,0,0,0],[0,1,2,3,4,0],[0,5,6,7,8,0],[0,9,10,11,12,0],[0,13,14,15,16,0],[0,0,0,0,0,0]];
@@ -10,10 +10,14 @@ let vacantTile={vacantId: document.querySelector("#t16"),x:-1 ,y:-1};
 let removeFunc=[];
 let congrBox=document.createElement("div");
 let resetButton=document.createElement("button");
+let didIWin;
+let display=document.querySelector('.timer');
+let timer;
 
 startGame();
 
 function startGame(){  
+    didIWin=false;
     do{
        durstenfeldShuffle(tileOrder);
     }while(countPolarity(tileOrder));
@@ -36,11 +40,40 @@ function startGame(){
             }
         }
     }
+    setTimer();
     setMovableTiles();
+}
+
+
+function startTimer(duration, display) {
+    var minutes, seconds;
+    timer = duration;
+    console.log(timer);
+    var interval = setInterval(function () {
+      minutes = parseInt(timer / 60, 10);
+      seconds = parseInt(timer % 60, 10);
+  
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+  
+      display.textContent = minutes + ":" + seconds;
+  
+      if (--timer < 0) {
+        display.textContent=":)";
+        clearInterval(interval);
+        gameWin('lose');
+      }
+    }, 1000);
+}
+
+function setTimer() {
+    var twentyMinutes = 60*4;
+    startTimer(twentyMinutes, display);
 }
 
 function countPolarity(arrayTemp){
     let inv=0;
+    let row;
     for (let i=0;i<16;i++){
         if (arrayTemp[i]!==16){
             for (let j=i+1;j<16;j++){
@@ -49,11 +82,23 @@ function countPolarity(arrayTemp){
                 }
             }
         }
+        else{
+            row=Math.floor(i/4)+1;
+        }
     }
-    if (inv%2===1){
-        return true;
+    if (row%2===0){
+        if (inv%2===0)
+            return false;
+        else
+            return true;
     }
-    return false;
+    else{
+        if (inv%2===1)
+            return false;
+        else
+            return true;
+    }
+    
 }
 
 function durstenfeldShuffle(array) {
@@ -119,6 +164,7 @@ function tileSlide(activeTilesNr,swappedTile){
     vacantTile.vacantId.id="t16";
     vacantTile.vacantId.textContent="";
     tileReset();
+    checkWin();
 }
 
 function tileReset(){
@@ -129,18 +175,30 @@ function tileReset(){
         activeTiles.pop();
         activeTilesNr.pop();
     }
+}
+
+function checkWin(){
     if (matricesAreEqual(winComb,tileMatr)){
         setMovableTiles();
-        gameWin();
+        gameWin("win");
     }
     else{
         setMovableTiles();
     }
 }
 
-function gameWin(){
-    congrBox.textContent="You win!";
-    congrBox.style.background='green';
+function gameWin(status){
+    tileReset();
+    if (status==="win"){
+        didIWin=true;
+        congrBox.textContent="You win!";
+        congrBox.style.background='green';
+        timer=0;
+    }
+    else if(!didIWin){
+        congrBox.textContent="Out of time!";
+        congrBox.style.background='red';
+    }
     resetButton.textContent="Reset";
     resetButton.addEventListener('click',resetGame);
     document.body.appendChild(congrBox);
